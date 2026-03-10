@@ -37,7 +37,7 @@
 // The advertising set handle allocated from Bluetooth stack.
 static uint8_t advertising_set_handle = 0xff;
 // Scanner address
-static bd_addr scanner = {.addr = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
+static bd_addr scanner = { .addr = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
 
 /**************************************************************************//**
  * Application Init.
@@ -104,13 +104,13 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       app_assert_status(sc);
 
       app_log("Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
-               address_type ? "static random" : "public device",
-               address.addr[5],
-               address.addr[4],
-               address.addr[3],
-               address.addr[2],
-               address.addr[1],
-               address.addr[0]);
+              address_type ? "static random" : "public device",
+              address.addr[5],
+              address.addr[4],
+              address.addr[3],
+              address.addr[2],
+              address.addr[1],
+              address.addr[0]);
 
       // Create an advertising set.
       sc = sl_bt_advertiser_create_set(&advertising_set_handle);
@@ -167,11 +167,12 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 /**************************************************************************//**
  * Start directed advertising.
  *****************************************************************************/
-sl_status_t start_directed_advertising() {
+sl_status_t start_directed_advertising()
+{
   return sl_bt_legacy_advertiser_start_directed(
-     advertising_set_handle, // The advertising set handle
-     sl_bt_legacy_advertiser_high_duty_directed_connectable, // A value of sl_bt_legacy_advertiser_directed_connection_mode_t
-     scanner, // The scanner address
-     0 // 0: Public address, 1: Random address
-  );
+    advertising_set_handle,  // The advertising set handle
+    sl_bt_legacy_advertiser_high_duty_directed_connectable,  // A value of sl_bt_legacy_advertiser_directed_connection_mode_t
+    scanner,  // The scanner address
+    0  // 0: Public address, 1: Random address
+    );
 }

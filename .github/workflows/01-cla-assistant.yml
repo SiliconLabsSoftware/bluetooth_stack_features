@@ -1,6 +1,4 @@
 name: 01-CLA-Assistant
-## This workflow is used for public repositories
-
 on:
   issue_comment:
     types: [created]
@@ -15,7 +13,12 @@ permissions:
 
 jobs:
   CLAAssistant:
-    if: ${{ github.event.repository.visibility == 'public' }}
+    if: >-
+      github.event_name == 'pull_request_target' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       (github.event.comment.body == 'recheck' ||
+        contains(github.event.comment.body, 'I have read the CLA Document and I hereby sign the CLA')))
     runs-on: ubuntu-24.04
     steps:
       - name: Create CLA Assistant Lite bot token
@@ -28,7 +31,6 @@ jobs:
           repositories: contributor-license-agreements
 
       - name: "CLA Assistant"
-        if: ${{ contains(github.event.comment.body, 'I have read the CLA Document and I hereby sign the CLA')  || github.event_name == 'pull_request_target' }}
         uses: SiliconLabsSoftware/action-cla-assistant@silabs_flavour_v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,7 +38,7 @@ jobs:
         with:
           path-to-signatures: "cla_signatures_db.json"
           path-to-document: "https://github.com/SiliconLabsSoftware/agreements-and-guidelines/blob/main/contributor_license_agreement.md"
-          branch: 'cla-database'
+          branch: "cla-database"
           allowlist: silabs-*,bot*
           # the following are the optional inputs - If the optional inputs are not given, then default values will be taken
           remote-organization-name: "SiliconLabsInternal"

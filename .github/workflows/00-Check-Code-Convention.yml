@@ -8,88 +8,38 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to test'
+        description: "Branch to test"
         type: string
-        default: 'master'
+        default: "main"
 
 jobs:
   job1:
     name: Check coding convention
-    runs-on: ubuntu-22.04 #uncrustify 0.64 can not be compiled on ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
-    - name: Trigger
-      run: echo "Triggered by ${{github.event_name}} event"
-    - name: Check Branch Input
-      run: |
-            if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-              if [ -z "${{ github.event.inputs.branch }}" ]; then
-                echo "Branch input is required for manual trigger."
-                exit 1
-              fi
+      - name: Trigger
+        run: echo "Triggered by ${{github.event_name}} event"
+      - name: Check Branch Input
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ -z "${{ github.event.inputs.branch }}" ]; then
+              echo "Branch input is required for manual trigger."
+              exit 1
             fi
-    - name: Checkout
-      uses: actions/checkout@v4.1.7
-      with:
-        ref: "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref }}"
-        submodules: true
-        fetch-depth: 0
-    - name: Log Current Branch and Commit
-      run: |
+          fi
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+        with:
+          ref: "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref }}"
+          submodules: true
+          fetch-depth: 0
+      - name: Log Current Branch and Commit
+        run: |
           echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
           echo "Current commit: $(git rev-parse HEAD)"
-    - name: Install commit check tools
-      run: |
-          echo "Installing pre-commit ..."
-          python3 -m pip install pre-commit
-          echo "Installing uncrustify 0.64 from source code  ..."
-          sudo apt-get install --no-install-recommends -y\
-            binutils ca-certificates git cmake make \
-            gcc g++ binutils libc6-dev
-          echo "Cloning Uncrustify repository..."
-          git clone -b uncrustify-0.64 --single-branch https://github.com/uncrustify/uncrustify.git
-          echo "Building and installing Uncrustify..."
-          mkdir ./uncrustify/build && cd ./uncrustify/build
-          cmake -D CMAKE_INSTALL_PREFIX=/usr/local -D CMAKE_BUILD_TYPE=RelWithDebInfo ../
-          sudo make -j "$(nproc)"
-          sudo make install
-          echo "Uncrustify has been installed successfully!"
-          cd ../../
-          sudo cp ./.github/coding-convention-tool/tools/uncrustify/uncrustify.cfg ./uncrustify/uncrustify.cfg
-          echo "Install clang-tidy"
-          sudo apt-get install clang-tidy
-    - name: Apply custom formatting configuration
-      run: |
-        echo "Applying custom formatting configuration..."
-        chmod +x ./.github/coding-convention-tool/project_custom_config_handler.sh
-        ./.github/coding-convention-tool/project_custom_config_handler.sh
-
-    - name: Run test
-      run: |
-        pre-commit install --config .github/coding-convention-tool/.pre-commit-config.yaml
-        pre-commit run --config .github/coding-convention-tool/.pre-commit-config.yaml --all-files 2>&1 | tee CodingConventionTool.txt
-        git diff > code-fix.patch || echo "No changes to patch."
-        ls -lah code-fix.patch
-
-    - name: Upload Result
-      uses: actions/upload-artifact@v4.3.4
-      with:
-        name: CodingConventionResult
-        path: CodingConventionTool.txt
-        retention-days: 90
-    - name: Upload Patch
-      uses: actions/upload-artifact@v4.3.4
-      with:
-        name: code-fix.patch
-        path: code-fix.patch
-        retention-days: 90
-    - name: Check log file to set status of the job
-      run: |
-        keywords=("Failed")
-        for keyword in "${keywords[@]}"; do
-          if grep -q "$keyword" CodingConventionTool.txt; then
-            echo "Keyword '$keyword' found in the file."
-            exit 1
-          else
-            echo "Keyword '$keyword' not found in the file."
-          fi
-        done
+      - name: Check Code Convention
+        uses: SiliconLabsSoftware/devs-coding-convention-tool@master
+        with:
+          exclude-regex: '.*\.(cs|txt)$'
+          codespell-ignore-words: ""
+          codespell-skip-paths: ""

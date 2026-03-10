@@ -25,8 +25,7 @@ void demo_setup_start_ext_adv(uint8_t handle);
 // The advertising set handle allocated from Bluetooth stack.
 static uint8_t advertising_set_handle = 0xff;
 
-const uint8_t dummy_service[16] = {0x81,0xc2,0x00,0x2d,0x31,0xf4,0xb0,0xbf,0x2b,0x42,0x49,0x68,0xc7,0x25,0x71,0x41};
-
+const uint8_t dummy_service[16] = { 0x81, 0xc2, 0x00, 0x2d, 0x31, 0xf4, 0xb0, 0xbf, 0x2b, 0x42, 0x49, 0x68, 0xc7, 0x25, 0x71, 0x41 };
 
 /**************************************************************************//**
  * Application Init.
@@ -71,23 +70,23 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     case sl_bt_evt_system_boot_id:
       // Print boot message.
       app_log("Bluetooth stack booted: v%d.%d.%d-b%d\n",
-                 evt->data.evt_system_boot.major,
-                 evt->data.evt_system_boot.minor,
-                 evt->data.evt_system_boot.patch,
-                 evt->data.evt_system_boot.build);
+              evt->data.evt_system_boot.major,
+              evt->data.evt_system_boot.minor,
+              evt->data.evt_system_boot.patch,
+              evt->data.evt_system_boot.build);
       // Extract unique ID from BT Address.
       sc = sl_bt_system_get_identity_address(&address, &address_type);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to get Bluetooth address\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to get Bluetooth address\n",
+                 (int)sc);
       app_log("Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X\n",
-                 address_type ? "static random" : "public device",
-                 address.addr[5],
-                 address.addr[4],
-                 address.addr[3],
-                 address.addr[2],
-                 address.addr[1],
-                 address.addr[0]);
+              address_type ? "static random" : "public device",
+              address.addr[5],
+              address.addr[4],
+              address.addr[3],
+              address.addr[2],
+              address.addr[1],
+              address.addr[0]);
       // Pad and reverse unique ID to get System ID.
       system_id[0] = address.addr[5];
       system_id[1] = address.addr[4];
@@ -103,14 +102,14 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                                                    sizeof(system_id),
                                                    system_id);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to write attribute\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to write attribute\n",
+                 (int)sc);
 
       // Create an advertising set.
       sc = sl_bt_advertiser_create_set(&advertising_set_handle);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to create advertising set\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to create advertising set\n",
+                 (int)sc);
       demo_setup_start_ext_adv(advertising_set_handle);
       break;
 
@@ -126,15 +125,15 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       sc = sl_bt_extended_advertiser_generate_data(advertising_set_handle,
                                                    sl_bt_advertiser_general_discoverable);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to generate data\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to generate data\n",
+                 (int)sc);
       sc = sl_bt_extended_advertiser_start(
         advertising_set_handle,
         sl_bt_extended_advertiser_scannable,
         0);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to start advertising\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to start advertising\n",
+                 (int)sc);
       break;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -159,12 +158,12 @@ void demo_setup_ext_adv(uint8_t handle)
 
   // Initialize advertising data with Flag and Local name
   uint8_t adv_data[MAX_EXTENDED_ADV_LENGTH] = {
-      0x02, // Length of flag
-      0x01, // Type flag
-      0x06, // Flag data
-      0x05, // Length of Local name
-      0x09, // Type local name
-      'A', 'd', 'v', 'C', // Local name
+    0x02,   // Length of flag
+    0x01,   // Type flag
+    0x06,   // Flag data
+    0x05,   // Length of Local name
+    0x09,   // Type local name
+    'A', 'd', 'v', 'C',   // Local name
   };
   // Byte amount in advertising data buffer now increased by 9
   amout_bytes += 9;
@@ -172,7 +171,7 @@ void demo_setup_ext_adv(uint8_t handle)
   adv_data[amout_bytes++] = 0x06;//more_128_uuids
 
   // copy the 128bits UUID of the service into the advertising data
-  memcpy(adv_data+amout_bytes,dummy_service,16);
+  memcpy(adv_data + amout_bytes, dummy_service, 16);
   amout_bytes += 16;
 
   // Prepare manufacturer_specific_data
@@ -190,8 +189,8 @@ void demo_setup_ext_adv(uint8_t handle)
   // Set advertising data
   sc = sl_bt_extended_advertiser_set_data(handle, amout_bytes, adv_data);
   app_assert(sc == SL_STATUS_OK,
-                      "[E: 0x%04x] Failed to set advertising data\n",
-                      (int)sc);
+             "[E: 0x%04x] Failed to set advertising data\n",
+             (int)sc);
 }
 
 void demo_setup_start_ext_adv(uint8_t handle)
@@ -205,18 +204,18 @@ void demo_setup_start_ext_adv(uint8_t handle)
     0,   // adv. duration
     0);  // max. num. adv. events
   app_assert(sc == SL_STATUS_OK,
-                "[E: 0x%04x] Failed to set advertising timing\n",
-                (int)sc);
+             "[E: 0x%04x] Failed to set advertising timing\n",
+             (int)sc);
 
   demo_setup_ext_adv(handle);
 
   sc = sl_bt_extended_advertiser_start(
-      handle,
-      sl_bt_extended_advertiser_non_connectable,
-      0);
+    handle,
+    sl_bt_extended_advertiser_non_connectable,
+    0);
   app_assert(sc == SL_STATUS_OK,
-                  "[E: 0x%04x] Failed to start advertising\n",
-                  (int)sc);
+             "[E: 0x%04x] Failed to start advertising\n",
+             (int)sc);
   /* Start general advertising and enable connections. */
   app_log("Start advertising.\r\n");
 }

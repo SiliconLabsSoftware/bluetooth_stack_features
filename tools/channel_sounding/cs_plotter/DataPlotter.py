@@ -33,7 +33,7 @@ class DataPlotter(QtWidgets.QMainWindow):
         self._cs_filtered_label = None
         self._velocity_label = None
         self._velocity_widget = None
-        
+
         self._cs_data_buffer = collections.deque([0], maxlen=buffer_size)
         self._raw_distance_buffer = collections.deque([0], maxlen=buffer_size)
         self._rssi_data_buffer = collections.deque([0], maxlen=buffer_size)
@@ -45,7 +45,7 @@ class DataPlotter(QtWidgets.QMainWindow):
         self._timer = QtCore.QTimer()
         self._start_time = 0
         self._previous_sample_time = 0
-        
+
         # Track whether each metric has been received
         self._raw_distance_ever_received = False
         self._rssi_distance_ever_received = False
@@ -80,19 +80,19 @@ class DataPlotter(QtWidgets.QMainWindow):
         # Create widgets for the upper portion of the main widget
         cs_filtered_widget, self._cs_filtered_label = create_label_widget()
         self._velocity_widget, self._velocity_label = create_label_widget()
-        
+
         upper_upper_splitter.addWidget(cs_filtered_widget)
         upper_upper_splitter.addWidget(self._velocity_widget)
 
         # Hide velocity widget initially until data is received
         self._velocity_widget.hide()
-       
+
         plot_window = pg.GraphicsLayoutWidget(title="Real-Time CS Distance Plot")
         self._plot = plot_window.addPlot()
         self._plot.setLabel("left", "Distance (m)", color="#555555", size="12pt")
         self._plot.setLabel("bottom", "Time (s)", color="#555555", size="12pt")
         self._legend = self._plot.addLegend(offset=(-1,1))
-        
+
         # Create CS distance curve (always visible)
         self._curve_cs_distance = self._plot.plot(pen=pg.mkPen("#3498DB", width=5), name="CS DISTANCE")
         # Create optional curves but don't add to plot yet
@@ -115,7 +115,7 @@ class DataPlotter(QtWidgets.QMainWindow):
             self._plot_velocity.linkedViewChanged(self._plot.vb, self._plot_velocity.XAxis)
         updateViews()
         self._plot.vb.sigResized.connect(updateViews)
-        
+
         # Add the plot and upper split to the main splitter. Now we should have plot in the lower and values in the upper section
         main_splitter.addWidget(upper_upper_splitter)
         main_splitter.addWidget(upper_lower_splitter)
@@ -124,9 +124,9 @@ class DataPlotter(QtWidgets.QMainWindow):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(main_splitter)
         central_widget.setLayout(layout)
-        
+
         # Layout is complete
-        
+
     def start_plot(self):
         # Initialize the timer so that we get periodic updates to the plot
         self._start_time = time.perf_counter()
@@ -197,7 +197,7 @@ class DataPlotter(QtWidgets.QMainWindow):
             self._raw_distance_buffer.append(self._raw_distance_buffer[-1])
         if not rssi_distance_received:
             self._rssi_distance_buffer.append(self._rssi_distance_buffer[-1])
-            
+
         self._cs_filtered_label.setText(
             f"<div style='text-align: center;'><span style='font-size: 75px;font-weight:bold; color: #2C3E50;'>Distance</span><br><span style='font-size: {LABEL_TEXT_SIZE_PX}px;font-weight: bold; color: #2C3E50;'>{self._cs_data_buffer[-1]} m</span>"
         )
@@ -216,7 +216,7 @@ class DataPlotter(QtWidgets.QMainWindow):
 
         if self._velocity_ever_received:
             self._curve_velocity.setData(list(self._time_buffer), list(self._velocity_buffer))
-        
+
         # Adjust the Y-range for distance (left axis)
         if Y_LIM_M != None:
             y_lim = Y_LIM_M
@@ -228,15 +228,14 @@ class DataPlotter(QtWidgets.QMainWindow):
             y_lim = max(max_values) if any(max_values) else 1
         self._plot.setYRange(-y_lim, y_lim)
         self._plot.setXRange(self._time_buffer[0], self._time_buffer[-1] + X_PADDING_S)
-        
+
         # Adjust the Y-range for velocity (right axis)
         if self._velocity_ever_received and self._velocity_buffer:
             vel_max = max(abs(min(self._velocity_buffer)), abs(max(self._velocity_buffer)))
             vel_range = max(vel_max * 1.2, 0.1)  # Add 20% padding, minimum 0.1
             self._plot_velocity.setYRange(-vel_range, vel_range)
-        
+
     def _handle_sigint(self, signum, frame):
         print("\nCtrl+C detected. Closing application...")
         self._timer.stop()
         self._app.quit()
-

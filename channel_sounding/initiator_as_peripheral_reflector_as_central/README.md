@@ -120,7 +120,7 @@ break;
       if (!cs_reflector_identify(conn_handle)) {
         break;
       }
-    
+
       reflector_log_info(INSTANCE_PREFIX "CS configuration completed" NL, conn_handle);
       reflector_log_debug(INSTANCE_PREFIX "CS - enable security" NL,
                     conn_handle);
