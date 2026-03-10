@@ -28,7 +28,7 @@ class ReflectorData(StepData):
         self._step_channels = step_channels
         self._ras_status_byte_index = 8
         self._ras_num_of_steps_index = 11
-        
+
     def parse_step_data(self):
         """
         Parse RAS reflector data.
@@ -53,16 +53,16 @@ class ReflectorData(StepData):
             if int(step_mode) & 0x80:
                 print(f"Reflector step {step_idx} aborted (bit 7 set).")
                 return -1
-            
+
             mode_type = int(step_mode) & 0x03
-            
+
             if mode_type == 0:
                 single_step_data_len = 3
             elif mode_type == 1:
                 single_step_data_len = 6
             elif mode_type == 2:
                 single_step_data_len = 4 * (self.num_antenna_paths + 1) + 1
-            
+
             if byte_index + single_step_data_len > len(self.raw_step_data_array):
                 break
 
@@ -74,10 +74,10 @@ class ReflectorData(StepData):
                 "Step_Channel": int(step_channel),
                 "Step_Data_Length": int(single_step_data_len)
             }
-            
+
             mode_specific_data, byte_index = self._get_mode_specific_data(mode_type, byte_index)
             # Add the parsed data to the dict
             step_data.update(mode_specific_data)
             self.parsed_step_data[f"{self.role}_step_data"][f"step_{step_idx}"] = step_data
-            
+
         return 0

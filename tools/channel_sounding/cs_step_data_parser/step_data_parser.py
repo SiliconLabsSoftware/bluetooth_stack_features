@@ -55,7 +55,7 @@ def extract_bytes_literal(line, key, ras=False):
     """
     # Simple HCI-style pattern:
     pattern = re.compile(r"""\b(?:data|value)=b(['"])((?:\\.|(?!\1).)*)\1""")
-    
+
     m = re.search(pattern, line)
     if not m:
         return b""
@@ -91,8 +91,8 @@ def parse_raw_log(input_file):
         if "bt_evt_gatt_characteristic" in line and RAS_CHAR_HANDLE == None:
            uuid = extract_field(r"uuid=(b'.*?')", line, int)
            if uuid.lower() == RANGING_DATA_UUID:
-              RAS_CHAR_HANDLE = extract_field(r"characteristic=(\d+)", line, int) 
-            
+              RAS_CHAR_HANDLE = extract_field(r"characteristic=(\d+)", line, int)
+
         # Global metadata from bt_evt_cs_procedure_enable_complete
         if "bt_evt_cs_procedure_enable_complete" in line:
             global_subevent_len = extract_field(r"subevent_len=(\d+)", line, int)
@@ -105,7 +105,7 @@ def parse_raw_log(input_file):
                 # Check if the new procedure starts before the reflector data is fully parsed
                 if current_proc["reflector_finished"] == False:
                     ras_intercepted = True
-                
+
             current_proc = {
                 "initiator_chunks": [],
                 "reflector_chunks": [],
@@ -136,14 +136,14 @@ def parse_raw_log(input_file):
                 current_proc["initiator_finished"] = True
 
             continue
-        
+
         # Continuation of initiator data
         if "bt_evt_cs_result_continue(" in line and current_proc:
             abort_reason = extract_field(r"abort_reason=(\d+)", line, int)
-            
+
             if current_proc and abort_reason != 0:
                 current_proc["initiator_metadata"]["abort_reason"] = abort_reason
-            
+
             pds = extract_field(r"procedure_done_status=(\d+)", line, int)
             chunk = extract_bytes_literal(line, "data")
             if chunk:
@@ -182,11 +182,11 @@ def build_json(procedures, subevent_len, subevent_interval, output_file):
     out = {"cs_procedures": []}
 
     for proc_index, proc in enumerate(procedures):
-        abort_reason = proc["initiator_metadata"].get("abort_reason", 0) 
+        abort_reason = proc["initiator_metadata"].get("abort_reason", 0)
         if abort_reason != 0:
             print(f"Procedure {proc_index} aborted at initiator with reason {abort_reason}. Skipping to next procedure.")
             continue
-        
+
         # Parse Initiator data
         initiator_raw = b"".join(proc["initiator_chunks"])
         num_paths = proc["initiator_metadata"].get("num_paths", 0)
@@ -216,7 +216,7 @@ def build_json(procedures, subevent_len, subevent_interval, output_file):
             step_channels=initiator.step_channels
         )
         rslt = reflector.parse_step_data()
-        
+
         if rslt != 0:
             print(f"Procedure {proc_index} aborted at reflector. Skipping to next procedure.")
             continue
@@ -240,10 +240,10 @@ def build_json(procedures, subevent_len, subevent_interval, output_file):
         )
 
         procedure_count += 1
-        
+
     with open(output_file, "w") as f:
         json.dump(out, f, indent=2)
-        
+
     return procedure_count
 
 if __name__ == "__main__":

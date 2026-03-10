@@ -159,7 +159,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       ble_peer_manager_central_init();
       ble_peer_manager_filter_init();
 
-
       // Print the Bluetooth address
       app_log_info(APP_PREFIX "Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X\n",
                    address_type ? "static random" : "public device",
@@ -187,7 +186,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       // Start scanning for initiator connections
       if (SL_BT_CONFIG_MAX_CONNECTIONS > 0) {
 #ifndef SL_CATALOG_CS_REFLECTOR_CLI_PRESENT
-          sc = ble_peer_manager_central_create_connection();
+        sc = ble_peer_manager_central_create_connection();
         app_assert_status(sc);
         app_log_info(APP_PREFIX "Scanning started for initiator connections..." APP_LOG_NL);
 #else
@@ -309,7 +308,7 @@ static void on_connection_opened_with_initiator(uint8_t conn_handle)
 
   // Scan for new initiator connections if we have room for more
   if (cs_reflector_get_active_instance_count() < SL_BT_CONFIG_MAX_CONNECTIONS) {
-      sc = ble_peer_manager_central_create_connection();
+    sc = ble_peer_manager_central_create_connection();
     app_assert_status(sc);
     app_log_info(APP_PREFIX "Scanning restarted for new initiator connections..." APP_LOG_NL);
   }
@@ -335,7 +334,7 @@ static void on_connection_closed(uint8_t conn_handle)
   // Restart scanning if needed
   if (scanning_should_be_restarted) {
     //sc = ble_peer_manager_central_create_connection();
-      (void)ble_peer_manager_central_create_connection();
+    (void)ble_peer_manager_central_create_connection();
     //app_assert_status(sc);
     app_log_info(APP_PREFIX "Scanning restarted for new initiator connections..." APP_LOG_NL);
   }

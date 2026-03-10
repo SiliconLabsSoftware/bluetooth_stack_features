@@ -50,37 +50,36 @@ void enableDebugGpios(GPIO_Port_TypeDef rx_obs_port, uint8_t rx_obs_pin, GPIO_Po
 
 #ifdef _SILICON_LABS_32B_SERIES_2
 
-
   // Configure PRS Channel 0 to output RAC_RX.
-  PRS_SourceAsyncSignalSet(0,PRS_ASYNC_CH_CTRL_SOURCESEL_RAC,_PRS_ASYNC_CH_CTRL_SIGSEL_RACRX) ;
-  PRS_PinOutput(RX_OBS_PRS_CHANNEL, prsTypeAsync,rx_obs_port, rx_obs_pin);
+  PRS_SourceAsyncSignalSet(0, PRS_ASYNC_CH_CTRL_SOURCESEL_RAC, _PRS_ASYNC_CH_CTRL_SIGSEL_RACRX);
+  PRS_PinOutput(RX_OBS_PRS_CHANNEL, prsTypeAsync, rx_obs_port, rx_obs_pin);
 
   /* Configure PRS Channel 1 to output RAC_RX.*/
-  PRS_SourceAsyncSignalSet(1,PRS_ASYNC_CH_CTRL_SOURCESEL_RAC,_PRS_ASYNC_CH_CTRL_SIGSEL_RACTX) ;
-  PRS_PinOutput(TX_OBS_PRS_CHANNEL, prsTypeAsync,tx_obs_port, tx_obs_pin);
+  PRS_SourceAsyncSignalSet(1, PRS_ASYNC_CH_CTRL_SOURCESEL_RAC, _PRS_ASYNC_CH_CTRL_SIGSEL_RACTX);
+  PRS_PinOutput(TX_OBS_PRS_CHANNEL, prsTypeAsync, tx_obs_port, tx_obs_pin);
 #elif defined(_SILICON_LABS_32B_SERIES_1)
-  if((tx_obs_port != gpioPortF)||(rx_obs_port != gpioPortF)){
-        return;
+  if ((tx_obs_port != gpioPortF) || (rx_obs_port != gpioPortF)) {
+    return;
   }
-  if(rx_obs_port == gpioPortF){
-      ch0_loc = rx_obs_pin;
+  if (rx_obs_port == gpioPortF) {
+    ch0_loc = rx_obs_pin;
   }
 
   /*set the radio RX active to channel 0*/
   PRS_SourceAsyncSignalSet(RX_OBS_PRS_CHANNEL,
-         PRS_RAC_RX,
-         ((PRS_RAC_RX & _PRS_CH_CTRL_SIGSEL_MASK)>> _PRS_CH_CTRL_SIGSEL_SHIFT));
+                           PRS_RAC_RX,
+                           ((PRS_RAC_RX & _PRS_CH_CTRL_SIGSEL_MASK) >> _PRS_CH_CTRL_SIGSEL_SHIFT));
   /* set the location for channel0 and enable it*/
-  PRS_GpioOutputLocation(RX_OBS_PRS_CHANNEL,/*ch0_loc*/rx_obs_pin);
+  PRS_GpioOutputLocation(RX_OBS_PRS_CHANNEL, /*ch0_loc*/ rx_obs_pin);
 
   /*set radio Tx active to channel 1.
    * channel 1. Locations can be 0 - 7*/
   PRS_SourceAsyncSignalSet(TX_OBS_PRS_CHANNEL,
-         (PRS_RAC_RX & _PRS_CH_CTRL_SOURCESEL_MASK),
-         ((PRS_RAC_RX & _PRS_CH_CTRL_SIGSEL_MASK)>> _PRS_CH_CTRL_SIGSEL_SHIFT));
+                           (PRS_RAC_RX & _PRS_CH_CTRL_SOURCESEL_MASK),
+                           ((PRS_RAC_RX & _PRS_CH_CTRL_SIGSEL_MASK) >> _PRS_CH_CTRL_SIGSEL_SHIFT));
 
-   /*for series 1 PRS channel 1 can only be output on port F so the pin number minus 1 equates to the location*/
-  PRS_GpioOutputLocation(TX_OBS_PRS_CHANNEL,tx_obs_pin-1);
+  /*for series 1 PRS channel 1 can only be output on port F so the pin number minus 1 equates to the location*/
+  PRS_GpioOutputLocation(TX_OBS_PRS_CHANNEL, tx_obs_pin - 1);
 #endif
 }
 
@@ -94,8 +93,7 @@ SL_WEAK void app_init(void)
   // This is called once during start-up.                                    //
   /////////////////////////////////////////////////////////////////////////////
 
-  enableDebugGpios(gpioPortB,0,gpioPortB,1);
-
+  enableDebugGpios(gpioPortB, 0, gpioPortB, 1);
 }
 
 /**************************************************************************//**
@@ -109,8 +107,6 @@ SL_WEAK void app_process_action(void)
   // Do not call blocking functions from here!                               //
   /////////////////////////////////////////////////////////////////////////////
 }
-
-
 
 /**************************************************************************//**
  * Bluetooth stack event handler.
@@ -167,13 +163,13 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
                                                  sl_bt_advertiser_general_discoverable);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to generate data\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to generate data\n",
+                 (int)sc);
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
                                          sl_bt_advertiser_connectable_scannable);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to start advertising\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to start advertising\n",
+                 (int)sc);
       break;
 
     // -------------------------------
@@ -188,13 +184,13 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
                                                  sl_bt_advertiser_general_discoverable);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to generate data\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to generate data\n",
+                 (int)sc);
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
                                          sl_bt_advertiser_connectable_scannable);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to start advertising\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to start advertising\n",
+                 (int)sc);
       break;
 
     ///////////////////////////////////////////////////////////////////////////

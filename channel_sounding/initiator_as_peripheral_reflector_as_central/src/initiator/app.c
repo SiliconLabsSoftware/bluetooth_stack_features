@@ -667,7 +667,6 @@ static sl_status_t create_new_initiator_instance(uint8_t conn_handle)
               conn_handle,
               sc);
     (void)ble_peer_manager_peripheral_close_connection(conn_handle);
-
   }
   return sc;
 }
@@ -926,11 +925,11 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       /*sc = ble_peer_manager_set_filter_device_name(device_name,
                                                    strlen(device_name),
                                                    false);
-      app_assert_status(sc);
+         app_assert_status(sc);
 
-      uint16_t ras_service_uuid = CS_RAS_SERVICE_UUID;
-      sc = ble_peer_manager_set_filter_service_uuid16((sl_bt_uuid_16_t *)&ras_service_uuid);
-      app_assert_status(sc);*/
+         uint16_t ras_service_uuid = CS_RAS_SERVICE_UUID;
+         sc = ble_peer_manager_set_filter_service_uuid16((sl_bt_uuid_16_t *)&ras_service_uuid);
+         app_assert_status(sc);*/
 
 #ifndef SL_CATALOG_CS_INITIATOR_CLI_PRESENT
       sc = ble_peer_manager_peripheral_create_connection();
@@ -1029,7 +1028,7 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       cs_initiator_instances[instance_num].read_remote_capabilities = true;
       // Advertise for new reflector connections if we have room for more
       if (num_reflector_connections < CS_INITIATOR_MAX_CONNECTIONS) {
-          sc = ble_peer_manager_peripheral_create_connection();
+        sc = ble_peer_manager_peripheral_create_connection();
         app_assert_status(sc);
         //cs_initiator_display_start_scanning();
         log_info(APP_PREFIX "Advertising restarted for new reflector connections..." NL);
@@ -1065,7 +1064,7 @@ void ble_peer_manager_on_event_initiator(ble_peer_manager_evt_type_t * event)
   bd_addr *address;
 
   switch (event->evt_id) {
-     case BLE_PEER_MANAGER_ON_CONN_OPENED_PERIPHERAL:
+    case BLE_PEER_MANAGER_ON_CONN_OPENED_PERIPHERAL:
       address = ble_peer_manager_get_bt_address(event->connection_id);
       log_info(APP_INSTANCE_PREFIX "Connection opened as peripheral with CS Reflector"
                                    " '%02X:%02X:%02X:%02X:%02X:%02X'" NL,

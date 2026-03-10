@@ -41,7 +41,7 @@ class StepData:
         self.parsed_step_data = {
             f"{self.role}_step_data": {},
         }
-     
+
     def _get_mode_specific_data(self, step_mode, byte_index):
         """ Parse the step data according to the mode-specific data structures. This is described in BLE Core Spec V6.0 | Vol 4, Part E Section 7.7.65.44. """
         mode_specific_data = {}
@@ -51,7 +51,7 @@ class StepData:
                 packet_quality, byte_index = self._get_bytes(byte_index, 1)
                 packet_rssi, byte_index = self._get_bytes(byte_index, 1)
                 packet_antenna, byte_index = self._get_bytes(byte_index, 1)
-                
+
                 mode_specific_data["Packet_Quality"] = int(packet_quality)
                 mode_specific_data["Packet_RSSI"] = int(np.int8(packet_rssi))
                 mode_specific_data["Packet_Antenna"] = int(packet_antenna)
@@ -66,7 +66,7 @@ class StepData:
                 packet_rssi, byte_index = self._get_bytes(byte_index, 1)
                 toa_tod, byte_index = self._get_bytes(byte_index, 2, True)
                 packet_antenna, byte_index = self._get_bytes(byte_index, 1)
-                
+
                 mode_specific_data["Packet_Quality"] = int(packet_quality)
                 mode_specific_data["Packet_NADM"] = int(packet_nadm)
                 mode_specific_data["Packet_RSSI"] = int(np.int8(packet_rssi))
@@ -75,7 +75,7 @@ class StepData:
 
             case 2:  # PBR
                 antenna_permutation_index, byte_index = self._get_bytes(byte_index, 1)
-                
+
                 # Read PCT and QI for all antenna paths and the tone extension
                 tone_pct_all_antennas = []
                 tone_qi_all_antennas = []
@@ -84,16 +84,16 @@ class StepData:
                     tone_pct_all_antennas.append(int(tone_pct))
                     tone_qi, byte_index = self._get_bytes(byte_index, 1)
                     tone_qi_all_antennas.append(int(tone_qi))
-                    
+
                 mode_specific_data["Antenna_Permutation_Index"] = int(antenna_permutation_index)
                 mode_specific_data["Tone_PCT"] = tone_pct_all_antennas
                 mode_specific_data["Tone_Quality_Indicator"] = tone_qi_all_antennas
-                
+
             case _:
                 pass
 
         return mode_specific_data, byte_index
-                        
+
     def _get_bytes(self, index, num_of_bytes, combine=False):
         """ Read the byte from a specific index in the procedure data. Multi-byte values can either be combined into little endian int
             or returned as an array. Return the data and the incremented index. """
@@ -105,7 +105,7 @@ class StepData:
             data = data[0]
         index += num_of_bytes
         return data, index
-    
+
 
 # ------------- UTIL ------------- #
 
@@ -115,5 +115,3 @@ def combine_bytes(byte_array):
     for i in range(len(byte_array)):
         combined = (combined << 8) | byte_array[-(i+1)]  # Start from the back as the combined byte should be in little-endian
     return combined
-    
-    

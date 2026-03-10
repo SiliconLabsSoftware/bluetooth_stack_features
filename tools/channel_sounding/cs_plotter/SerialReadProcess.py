@@ -59,4 +59,3 @@ class SerialReadProcess(mp.Process):
     def _handle_sigint(self, signum, frame):
         self._ser.cancel_read()
         self._ser.close()
-

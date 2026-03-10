@@ -70,7 +70,6 @@ static void sli_set_custom_bt_address(void);
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 
-
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
@@ -152,13 +151,13 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
                                                  sl_bt_advertiser_general_discoverable);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to generate data\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to generate data\n",
+                 (int)sc);
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
                                          sl_bt_advertiser_connectable_scannable);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to start advertising\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to start advertising\n",
+                 (int)sc);
       break;
 
     // -------------------------------
@@ -173,13 +172,13 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
                                                  sl_bt_advertiser_general_discoverable);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to generate data\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to generate data\n",
+                 (int)sc);
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
                                          sl_bt_advertiser_connectable_scannable);
       app_assert(sc == SL_STATUS_OK,
-                    "[E: 0x%04x] Failed to start advertising\n",
-                    (int)sc);
+                 "[E: 0x%04x] Failed to start advertising\n",
+                 (int)sc);
       break;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -192,7 +191,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       break;
   }
 }
-
 
 /**************************************************************************//**
  * @brief
@@ -207,8 +205,8 @@ static void sli_set_custom_bt_address(void)
   sl_status_t status;
 
   //Adjust token byte Endianness
-  for(uint8_t i = 0; i < 6; i++) {
-    myaddr.addr[i] = mfg_token[7-i];
+  for (uint8_t i = 0; i < 6; i++) {
+    myaddr.addr[i] = mfg_token[7 - i];
   }
 
   //Get current BT address:
@@ -217,16 +215,16 @@ static void sli_set_custom_bt_address(void)
   status = sl_bt_system_get_identity_address(&cur_addr, &address_type);
 
   if (status != SL_STATUS_OK) {
-      while(1); //Issue retrieving the status
+    while (1) ; //Issue retrieving the status
   }
 
   //Compare current and desired BT address, IF NOT EQUAL update and reset
   //  reset needed to apply BT address changes in stack
-  if((memcmp(&cur_addr, &myaddr, 6)) != 0) {
-    status = sl_bt_system_set_identity_address(myaddr,0); // set new BT address
+  if ((memcmp(&cur_addr, &myaddr, 6)) != 0) {
+    status = sl_bt_system_set_identity_address(myaddr, 0); // set new BT address
 
     if (status != SL_STATUS_OK) {
-        while(1); //Issue setting the address
+      while (1) ; //Issue setting the address
     }
 
     sl_bt_system_reset(0); // reset

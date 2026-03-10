@@ -56,5 +56,3 @@ SoC-empty example starts advertising by default. Therefore, if you connect a log
 ## Source
 
 * [app.c](src/app.c)
-
-

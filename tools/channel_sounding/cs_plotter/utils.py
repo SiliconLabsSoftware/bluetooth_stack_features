@@ -65,7 +65,7 @@ def parse_data(data):
             rssi_distance_match = re.search(r'(\d+)\s*mm', parts[3])
             if rssi_distance_match:
                 result['rssi_distance'] = int(rssi_distance_match.group(1))
-    
+
     # Parse speed in m/s: look for pattern like "| +0.85 m/s" or "| -0.00 m/s"
     speed_match = re.search(r'([+-]?\d*\.?\d+)\s*m/s', data)
     if speed_match:
