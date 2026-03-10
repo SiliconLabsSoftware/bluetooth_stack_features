@@ -17,13 +17,11 @@
 #include "em_common.h"
 #include "app_assert.h"
 #include "sl_bluetooth.h"
-#include "gatt_db.h"
 #include "app.h"
-
 #include "sl_bt_api.h"
 #include "app_log.h"
 
-// This constant is UUID of periodic synchronous service
+// UUID of periodic synchronous service used to identify the advertisement of the target device
 const uint8_t periodicSyncService[16] = { 0x81, 0xc2, 0x00, 0x2d, 0x31, 0xf4, 0xb0, 0xbf, 0x2b, 0x42, 0x49, 0x68, 0xc7, 0x25, 0x71, 0x41 };
 
 // Parse advertisements looking for advertised periodicSync Service.
@@ -32,15 +30,13 @@ static uint8_t findServiceInAdvertisement(uint8_t *data, uint8_t len)
   uint8_t adFieldLength;
   uint8_t adFieldType;
   uint8_t i = 0;
-  app_log("packet length %d\r\n", len);
   // Parse advertisement packet
   while (i < len) {
     adFieldLength = data[i];
     adFieldType = data[i + 1];
-    // Partial ($02) or complete ($03) list of 128-bit UUIDs
-    app_log("adField type %d \r\n", adFieldType);
+    // found incomplete/complete list of 128-bit Service UUIDs as defined in the assgigned numbers SIG document.
     if (adFieldType == 0x06 || adFieldType == 0x07) {
-      // compare UUID to service UUID
+      // compare  UUID to periodic synchronous service UUID
       if (memcmp(&data[i + 2], periodicSyncService, 16) == 0) {
         return 1;
       }
@@ -83,92 +79,90 @@ SL_WEAK void app_process_action(void)
 void sl_bt_on_event(sl_bt_msg_t *evt)
 {
   sl_status_t sc;
-  bd_addr address;
-  uint8_t address_type;
-  uint8_t system_id[8];
-
   static uint16_t sync;
 
   switch (SL_BT_MSG_ID(evt->header)) {
     // -------------------------------
     // This event indicates the device has started and the radio is ready.
     // Do not call any stack command before receiving this boot event!
-    case sl_bt_evt_system_boot_id:
-
+    case sl_bt_evt_system_boot_id: {
+      bd_addr address;
+      uint8_t address_type;
       // Extract unique ID from BT Address.
       sc = sl_bt_system_get_identity_address(&address, &address_type);
-      app_assert(sc == SL_STATUS_OK,
-                 "[E: 0x%04x] Failed to get Bluetooth address\n",
-                 (int)sc);
+      app_assert_status(sc);
 
-      // Pad and reverse unique ID to get System ID.
-      system_id[0] = address.addr[5];
-      system_id[1] = address.addr[4];
-      system_id[2] = address.addr[3];
-      system_id[3] = 0xFF;
-      system_id[4] = 0xFE;
-      system_id[5] = address.addr[2];
-      system_id[6] = address.addr[1];
-      system_id[7] = address.addr[0];
+      app_log_info("Bluetooth %s address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+                   address_type ? "static random" : "public device",
+                   address.addr[5],
+                   address.addr[4],
+                   address.addr[3],
+                   address.addr[2],
+                   address.addr[1],
+                   address.addr[0]);
 
-      sc = sl_bt_gatt_server_write_attribute_value(gattdb_system_id,
-                                                   0,
-                                                   sizeof(system_id),
-                                                   system_id);
-      app_assert(sc == SL_STATUS_OK,
-                 "[E: 0x%04x] Failed to write attribute\n",
-                 (int)sc);
+      // Scan in intervals of 125ms for 125ms time window
+      sc = sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_passive, 200, 200);
+      app_assert_status(sc);
 
-      // periodic scanner setting
-      sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_passive, 200, 200);
-      sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m,
-                          sl_bt_scanner_discover_observation);
-
+      sc = sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m,
+                               sl_bt_scanner_discover_observation);
+      app_assert_status(sc);
       break;
+    }
 
-    // scan response
+    // -------------------------------
+    // This event indicates the device has received extended advertisements PDU
     case sl_bt_evt_scanner_extended_advertisement_report_id:
-      app_log("got ext adv indication with tx_power = %d\r\n",
-              evt->data.evt_scanner_extended_advertisement_report.tx_power);
-
+      app_log_info("got extended advertisement indication with tx_power = %d\r\n",
+                   evt->data.evt_scanner_extended_advertisement_report.tx_power);
       if (findServiceInAdvertisement(&(evt->data.evt_scanner_extended_advertisement_report.data.data[0]), evt->data.evt_scanner_extended_advertisement_report.data.len) != 0) {
-        app_log("found periodic sync service, attempting to open sync\r\n");
+        app_log_info("found periodic sync service, attempting to open sync\r\n");
         sc = sl_bt_sync_scanner_open(evt->data.evt_scanner_extended_advertisement_report.address,
                                      evt->data.evt_scanner_extended_advertisement_report.address_type,
                                      evt->data.evt_scanner_extended_advertisement_report.adv_sid,
                                      &sync);
-        app_log_info("cmd_sync_open() sync = 0x%4lX\r\n", sc);
+        app_assert_status(sc);
+        /* now that sync is open, we can stop scanning*/
+        sl_bt_scanner_stop();
       }
       break;
 
+    // -------------------------------
+    // This event indicates the device has synchronized successfully to the perodic advertisement
     case sl_bt_evt_periodic_sync_opened_id:
-      /* now that sync is open, we can stop scanning*/
-      app_log("evt_sync_opened\r\n");
-//      sl_bt_system_set_soft_timer(0,1,0);
-      sl_bt_scanner_stop();
-      break;
+    {
+      bd_addr advA = evt->data.evt_periodic_sync_opened.address;
+      app_log_info("Successfully synchronized to bluetooth address: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+                   advA.addr[5],
+                   advA.addr[4],
+                   advA.addr[3],
+                   advA.addr[2],
+                   advA.addr[1],
+                   advA.addr[0]);
 
+      break;
+    }
+
+    // -------------------------------
+    // This event indicates the synchornizatiion has been terminated
     case sl_bt_evt_sync_closed_id:
-      app_log("periodic sync closed. reason 0x%2X, sync handle %d",
-              evt->data.evt_sync_closed.reason,
-              evt->data.evt_sync_closed.sync);
+      app_log_info("periodic sync closed. reason 0x%04X, sync handle 0x%04X\r\n",
+                   evt->data.evt_sync_closed.reason,
+                   evt->data.evt_sync_closed.sync);
       /* restart discovery */
       sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m,
                           sl_bt_scanner_discover_observation);
       break;
 
+    // -------------------------------
+    // This event indicates the device has received a periodic advertisements PDU
     case sl_bt_evt_periodic_sync_report_id:
-
-      app_log("periodic sync handle %d\r\n", evt->data.evt_periodic_sync_report.sync);
-      app_log("got following sync data: \r\n ");
+      app_log_info("Periodic advertisemenet payload:  ");
       for (int i = 0; i < evt->data.evt_periodic_sync_report.data.len; i++) {
-        app_log(" %X", evt->data.evt_periodic_sync_report.data.data[i]);
+        app_log("%02X,", evt->data.evt_periodic_sync_report.data.data[i]);
       }
       app_log("\r\n");
-      app_log("periodic sync RSSI %d and Tx power %d\r\n",
-              evt->data.evt_periodic_sync_report.rssi,
-              evt->data.evt_periodic_sync_report.tx_power);
-      app_log("periodic data status %d\r\n", evt->data.evt_periodic_sync_report.data_status);
       break;
 
     ///////////////////////////////////////////////////////////////////////////

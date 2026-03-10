@@ -1,8 +1,8 @@
-project_name: soc_periodic_advertisement_advertiser
+project_name: soc_periodic_advertisement_connectionless_synchronization_advertiser
 package: Bluetooth
-label: Bluetooth - SoC Periodic Advertisement Advertiser
+label: Bluetooth - SoC Periodic Advertisement Connectionless Synchronization Advertiser
 description: >
-  This example demonstrates the periodic advertising feature of Bluetooth 5 in the advertiser side.
+  This example demonstrates the periodic advertising (without response) feature using extended advertisemet for synchronization (advertiser).
 category: Bluetooth Examples
 quality: development
 
@@ -14,10 +14,7 @@ component:
   - id: bluetooth_feature_connection_role_peripheral
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
-  - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
-  - id: in_place_ota_dfu
-  - id: bootloader_interface
   - id: rail_util_pti
   - id: app_assert
   - id: component_catalog
