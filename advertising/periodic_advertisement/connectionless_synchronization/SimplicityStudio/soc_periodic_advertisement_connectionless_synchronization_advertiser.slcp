@@ -1,0 +1,68 @@
+project_name: soc_periodic_advertisement_connectionless_synchronization_advertiser
+package: Bluetooth
+label: Bluetooth - SoC Periodic Advertisement Connectionless Synchronization Advertiser
+description: >
+  This example demonstrates the periodic advertising (without response) feature using extended advertisemet for synchronization (advertiser).
+category: Bluetooth Examples
+quality: development
+
+component:
+  - id: bluetooth_stack
+  - id: gatt_configuration
+  - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_connection
+  - id: bluetooth_feature_connection_role_peripheral
+  - id: bluetooth_feature_gatt
+  - id: bluetooth_feature_gatt_server
+  - id: bluetooth_feature_system
+  - id: rail_util_pti
+  - id: app_assert
+  - id: component_catalog
+  - id: mpu
+  - id: bluetooth_feature_periodic_advertiser
+  - id: bluetooth_feature_extended_advertiser
+  - id: iostream_usart
+    instance:
+    - vcom
+  - id: iostream_retarget_stdio
+  - id: app_log
+  - id: board_control
+  - id: bt_post_build
+  - id: sl_system
+  - id: clock_manager
+  - id: device_init
+
+source:
+  - path: ../src/advertiser/app.c
+  - path: ../src/advertiser/main.c
+
+include:
+  - path: ../inc/advertiser/
+    file_list:
+    - path: app.h
+
+readme:
+  - path: ./readme.md
+
+config_file:
+  - override:
+      component: gatt_configuration
+      file_id: gatt_configuration_file_id
+    path: ../config/gatt_configuration.btconf
+    directory: btconf
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: "2752"
+  - name: SL_HEAP_SIZE
+    value: "9200"
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+
+tag:
+  - hardware:rf:band:2400
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true
