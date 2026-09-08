@@ -1,0 +1,68 @@
+project_name: soc_encrypted_pawr_tag
+package: Bluetooth
+label: Bluetooth - SoC Encrypted PAwR Tag
+description: >
+  Receives PAwR synchronization with PAST and exchanges encrypted advertising data with an access point.
+category: Bluetooth Examples
+quality: development
+
+component:
+  - id: device_init
+  - id: clock_manager
+  - id: bluetooth_stack
+  - id: gatt_configuration
+  - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_extended_advertiser
+  - id: bluetooth_feature_legacy_scanner
+  - id: bluetooth_feature_connection_role_central
+  - id: bluetooth_feature_connection_role_peripheral
+  - id: bluetooth_feature_gatt
+  - id: bluetooth_feature_gatt_server
+  - id: bluetooth_feature_sm
+  - id: bluetooth_feature_system
+  - id: bluetooth_feature_past_receiver
+  - id: bluetooth_feature_pawr_sync
+  - id: ead_core
+  - id: app_assert
+  - id: app_log
+  - id: app_os_helper
+  - id: component_catalog
+  - id: gatt_service_device_information_override
+  - id: mpu
+  - id: rail_util_pti
+  - id: sl_main
+
+source:
+  - path: ../src/tag/app.c
+  - path: ../src/tag/main.c
+
+include:
+  - path: ../inc/tag/
+    file_list:
+      - path: app.h
+
+readme:
+  - path: ../README.md
+
+config_file:
+  - override:
+      component: gatt_configuration
+      file_id: gatt_configuration_file_id
+    path: ../config/gatt_configuration.btconf
+    directory: btconf
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: "2752"
+  - condition:
+      - psa_crypto
+    name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: "0"
+
+tag:
+  - hardware:rf:band:2400
+
+ui_hints:
+  highlight:
+    - path: ../README.md
+      focus: true
