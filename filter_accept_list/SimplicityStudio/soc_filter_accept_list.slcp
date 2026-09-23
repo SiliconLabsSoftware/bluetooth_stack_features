@@ -1,0 +1,140 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: soc_filter_accept_list
+label: soc_filter_accept_list
+description: |
+  This example demonstrates the use of Filter Accept List in various scenarios.
+category: Bluetooth Examples
+quality: development
+
+component:
+  - id: app_assert
+  - id: app_os_helper
+  - id: bluetooth_feature_accept_list
+  - id: bluetooth_feature_connection_role_central
+  - id: bluetooth_feature_connection_role_peripheral
+  - id: bluetooth_feature_gatt
+  - id: bluetooth_feature_gatt_server
+  - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_legacy_scanner
+  - id: bluetooth_feature_resolving_list
+  - id: bluetooth_feature_sm
+  - id: bluetooth_feature_system
+  - id: bluetooth_feature_use_accurate_api_address_types
+  - id: bluetooth_stack
+  - id: cli
+    instance:
+    - inst
+  - id: clock_manager
+  - id: device_init
+  - id: gatt_configuration
+  - id: gatt_service_device_information_override
+  - id: mpu
+  - id: rail_util_pti
+  - id: sl_main
+  - id: iostream_eusart
+    instance:
+    - vcom
+
+source:
+  - path: ../src/app.c
+
+include:
+  - path: ../inc/
+    file_list:
+    - path: app.h
+    - path: cli_functions.h
+  
+readme:
+  - path: ../readme.md
+
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_STACK_SIZE
+    value: '2752'
+  - condition:
+    - psa_crypto
+    name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: '0'
+
+template_contribution:
+# -------------------------------- CLI commands --------------------------------
+  - name: cli_command
+    value:
+      name: scan
+      handler: scan
+      help: "Control scanning"
+      argument:
+        - type: uint8
+          help: "0=Disable 1=Enable"
+  - name: cli_command
+    value:
+      name: connect
+      handler: connect
+      help: "Connect a discovered device"
+      argument:
+        - type: uint8
+          help: "index of the discovered device"
+  - name: cli_command
+    value:
+      name: advertise
+      handler: advertise
+      help: "Control advertising"
+      argument:
+        - type: uint8
+          help: "0=Disable 1=Enable"
+  - name: cli_command
+    value:
+      name: pair
+      handler: pair
+      help: "Pair with the connected device"
+  - name: cli_command
+    value:
+      name: add_peer
+      handler: add_peer
+      help: "Add the currently connected device to the Filter Accept List"
+  - name: cli_command
+    value:
+      name: add_discovered
+      handler: add_discovered
+      help: "Add a discovered device to the Filter Accept List"
+      argument:
+        - type: uint8
+          help: "index of the discovered device"
+  - name: cli_command
+    value:
+      name: filter
+      handler: filter
+      help: "Control filtering"
+      argument:
+        - type: uint8
+          help: "0=Disable 1=Enable"
+  - name: cli_command
+    value:
+      name: disconnect
+      handler: disconnect
+      help: "Close the current connection"
+  - name: cli_command
+    value:
+      name: bondings
+      handler: bondings
+      help: "List the bonded devices"
+  - name: cli_command
+    value:
+      name: clear
+      handler: clear
+      help: "Clear the Filter Accept List"
+  - name: cli_command
+    value:
+      name: unpair
+      handler: unpair
+      help: "Unpair a device in the bonded devices list"
+      argument:
+        - type: uint8
+          help: "index in the bonded devices list"
+
+ui_hints:
+  highlight:
+  - path: readme.md
+    focus: true
+
