@@ -21,6 +21,7 @@ component:
   - id: mpu
   - id: bluetooth_feature_periodic_advertiser
   - id: bluetooth_feature_extended_advertiser
+  - id: bluetooth_feature_advertiser_past
   - id: iostream_usart
     instance:
     - vcom
