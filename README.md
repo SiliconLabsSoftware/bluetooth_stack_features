@@ -22,6 +22,7 @@ This repo contains example projects which demonstrate the features of the Silico
 - Connections
 - GATT Protocol
 - Security
+- Filter Accept List
 - Persistent Storage
 - Firmware Upgrade
   - OTA for NCP Hosts
