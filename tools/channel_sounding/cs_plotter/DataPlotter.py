@@ -33,6 +33,7 @@ class DataPlotter(QtWidgets.QMainWindow):
         self._cs_filtered_label = None
         self._velocity_label = None
         self._velocity_widget = None
+        self._metrics_splitter = None
 
         self._cs_data_buffer = collections.deque([0], maxlen=buffer_size)
         self._raw_distance_buffer = collections.deque([0], maxlen=buffer_size)
@@ -73,7 +74,7 @@ class DataPlotter(QtWidgets.QMainWindow):
         self.setCentralWidget(central_widget)
 
         # Create splitters so that we can distribute the widgets in the main widget
-        upper_upper_splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
+        self._metrics_splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         upper_lower_splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
         main_splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
 
@@ -81,8 +82,8 @@ class DataPlotter(QtWidgets.QMainWindow):
         cs_filtered_widget, self._cs_filtered_label = create_label_widget()
         self._velocity_widget, self._velocity_label = create_label_widget()
 
-        upper_upper_splitter.addWidget(cs_filtered_widget)
-        upper_upper_splitter.addWidget(self._velocity_widget)
+        self._metrics_splitter.addWidget(cs_filtered_widget)
+        self._metrics_splitter.addWidget(self._velocity_widget)
 
         # Hide velocity widget initially until data is received
         self._velocity_widget.hide()
@@ -117,7 +118,7 @@ class DataPlotter(QtWidgets.QMainWindow):
         self._plot.vb.sigResized.connect(updateViews)
 
         # Add the plot and upper split to the main splitter. Now we should have plot in the lower and values in the upper section
-        main_splitter.addWidget(upper_upper_splitter)
+        main_splitter.addWidget(self._metrics_splitter)
         main_splitter.addWidget(upper_lower_splitter)
         main_splitter.addWidget(plot_window)
 
@@ -179,6 +180,14 @@ class DataPlotter(QtWidgets.QMainWindow):
                             self._plot_velocity.addItem(self._curve_velocity)
                             self._legend.addItem(self._curve_velocity, "VELOCITY")
                             self._velocity_widget.show()
+                            # Rebalance the splitter after restoring the hidden
+                            # velocity widget so both metric panes are equal.
+                            QtCore.QTimer.singleShot(
+                                0,
+                                lambda: self._metrics_splitter.setSizes(
+                                    [self._metrics_splitter.width() // 2] * 2
+                                ),
+                            )
                             self._plot.showAxis('right')
                             self._velocity_ever_received = True
             except UnicodeError:
