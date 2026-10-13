@@ -21,14 +21,13 @@ import multiprocessing as mp
 from utils import *
 
 class SerialReadProcess(mp.Process):
-    def __init__(self, serial_port, baud_rate, queue):
+    def __init__(self, serial_port, baud_rate, queue, stop_event):
         super().__init__()
         self._serial_port = serial_port
         self._baud_rate = baud_rate
         self._queue = queue
+        self._stop_event = stop_event
         self._ser = None
-
-        signal.signal(signal.SIGINT, self._handle_sigint)
 
     def open_serial_connection(self):
         try:
@@ -38,6 +37,7 @@ class SerialReadProcess(mp.Process):
             self._ser = None
 
     def run(self):
+        signal.signal(signal.SIGINT, self._handle_sigint)
         self.open_serial_connection()
 
         # Check if the connection was opened
@@ -49,13 +49,18 @@ class SerialReadProcess(mp.Process):
 
         self._ser.reset_input_buffer()
         try:
-            while True:
+            while not self._stop_event.is_set():
                 data = self._ser.readline()
-                self._queue.put(data)
+                if data:
+                    self._queue.put(data)
 
         except KeyboardInterrupt:
-            pass  # Do nothing. This is just to prevent the error from being displayed when we quit
+            self._stop_event.set()
+        finally:
+            if self._ser is not None and self._ser.is_open:
+                self._ser.close()
 
     def _handle_sigint(self, signum, frame):
-        self._ser.cancel_read()
-        self._ser.close()
+        self._stop_event.set()
+        if self._ser is not None and self._ser.is_open:
+            self._ser.cancel_read()
