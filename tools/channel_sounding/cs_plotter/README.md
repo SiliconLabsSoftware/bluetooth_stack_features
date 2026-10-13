@@ -4,7 +4,7 @@
 It's designed to read and visualize serial data from Silabs SoC initiator.
 
 > [!NOTE]  
-> This application has been developed and tested using SiSDK-2025.12.0.
+> This application has been developed and tested using SiSDK-2026.6.1.
 
 ## Features
 
